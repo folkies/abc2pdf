@@ -17,7 +17,9 @@ public class Abc2PdfService {
 		processBuilder.inheritIO();
 		Process process = processBuilder.start();
 		int exit = process.waitFor();
-		System.out.println(exit);
+		if (exit != 0) {
+			throw new IllegalStateException("spawned process exited with code " + exit);
+		}
 		return pdfFile.toFile();
 	}
 

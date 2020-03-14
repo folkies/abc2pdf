@@ -27,9 +27,7 @@ public class PrintApi {
 	public Response print(InputStream is) throws IOException, InterruptedException {
 		java.nio.file.Path tempFile = Files.createTempFile("tmp", ".abc");
 		Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING);
-		Files.readAllLines(tempFile).forEach(System.out::println);
 		File pdfFile = abc2pdfService.convertToPdf(tempFile.toFile());
-		System.out.println("pdf = " + pdfFile);
 		return Response.ok(pdfFile, "application/pdf").build();
 	}
 }
