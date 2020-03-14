@@ -26,35 +26,17 @@ RUN wget -O /tmp/abc2midi.zip "https://ifdo.ca/~seymour/runabc/abcMIDI-${abc2mid
     && unzip /tmp/abc2midi.zip -d /tmp && cd /tmp/abcmidi* \
     && mkdir -p /tmp/build && ./configure && make DESTDIR=/tmp/build install
 
-FROM minidocks/pyinstaller AS abc2xml
-
-ARG xml2abc_version=139
-ARG abc2xml_version=222
-
-RUN apk add wget && wget -O /tmp/xml2abc.zip "https://wim.vree.org/svgParse/xml2abc.py-${xml2abc_version}.zip" \
-    && wget -O /tmp/abc2xml.zip "https://wim.vree.org/svgParse/abc2xml.py-${abc2xml_version}.zip" \
-    && unzip /tmp/xml2abc.zip -d /tmp && unzip /tmp/abc2xml.zip -d /tmp \
-    && pyinstaller -s /tmp/xml2abc*/xml2abc.py && pyinstaller -s /tmp/abc2xml*/abc2xml.py
-
-RUN mkdir /tmp/final && cp -r /dist/xml2abc/* /tmp/final && cp -r /dist/abc2xml/* /tmp/final \
-    && rm /tmp/final/libcrypto*so*
-
 FROM minidocks/node AS latest
 LABEL maintainer="Harald Wellmann <harald.wellmann@gmx.de>"
 
 COPY --from=abcm2ps /tmp/build /
-COPY --from=abc2xml /tmp/final/* /usr/local/bin/
 
-ARG abc2svg_version=1.20.7
-
-RUN apk add pango ghostscript openjdk8-jre && npm i -g abc2svg@$abc2svg_version jszip && clean
+RUN apk add pango ghostscript openjdk8-jre && clean
 
 COPY target/lib/* /deployments/lib/
 COPY target/*-runner.jar /deployments/app.jar
 COPY /scripts/convert.sh /deployments/convert.sh
 
 EXPOSE 8080
-
-
 
 CMD [ "java", "-jar", "/deployments/app.jar" ]
