@@ -8,12 +8,12 @@ RUN wget -O /tmp/abcm2ps.tar.gz "https://github.com/leesavide/abcm2ps/archive/v$
     && tar -xvzf /tmp/abcm2ps.tar.gz -C /tmp && cd /tmp/abcm2ps* \
     && mkdir -p /tmp/build && ./configure && make DESTDIR=/tmp/build install
 
-FROM minidocks/node AS latest
+FROM adoptopenjdk/openjdk8:jdk8u242-b08-alpine-slim AS latest
 LABEL maintainer="Harald Wellmann <harald.wellmann@gmx.de>"
 
 COPY --from=abcm2ps /tmp/build /
 
-RUN apk add pango ghostscript openjdk8-jre && clean
+RUN apk --no-cache add pango ghostscript
 
 COPY target/lib/* /deployments/lib/
 COPY target/*-runner.jar /deployments/app.jar
